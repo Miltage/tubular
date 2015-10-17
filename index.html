@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+      <head>
+            <style>
+                html, body {
+                    margin: 0;
+                    padding: 0;
+                }
+
+                #player {
+                    position: absolute;
+                    height: 100%;
+                }
+
+                #audio {
+                    position: absolute;
+                    z-index: 100;
+                }
+
+                #overlay {
+                    position: absolute;
+                    z-index: 10;
+                    width: 100%;
+                    height: 100%;
+                }
+
+                #noise {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    background: url('noise.gif');
+                }
+
+                canvas {
+                    position: absolute;
+                }
+
+                iframe {
+                    width: 100%;
+                    height: 100%;
+                }
+            </style>
+      </head>
+      <body>
+            <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+            <div id="audio"></div>
+            <div id="overlay"><div id="noise"></div></div>
+            <div id="player"></div>
+            <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+            <script src="SeamlessLoop.js"></script>
+            <script>
+                var currentId = '';
+                var videos = ['YFVC_Ktge7Y', 'cwhLueAWItA', 'sFbHyju7hN8', 'M-Wv7cSXW4U', 'PWFNJ-6_kKk', 'HB81HSHRauo', 'x3UlQsCL0lM', 'bS5P_LAqiVg', 
+                'NgWY1_ck_RU', 'ZX0QHGEtPq4', 'M-Wv7cSXW4U', 'Ag2KpfVTNP8', 'DG2GwFp3yEs', 'eAiTvtGIJ-0', 'IAarClRt8hY', 'hzhE0YLahJs',
+                'g_bNuLJxBdU', 'OTOfi6nJuXw', 'VXBuMqclY_4', 'somRY_YoWY4', 'RwX8MaFDHk', 'a3Q8oM_AnK8', 'jQgQqSVzuY8', 'hMH_HWOnYvY',
+                'XxV1dIRlmOU', 'ba7is5M0POs', '24xqRhEwvWQ', '4NtBnaarXfg', 'd4NFdLBnD0g', 'pxt7uUHGUvw', '1QW4Z2unhNg', 'F9zYwwB0txA', 'WcOTYZFVT_0', 'Vooaf72e8E8'];
+                var next = null;
+
+                var tag = document.createElement('script');
+
+                tag.src = "https://www.youtube.com/iframe_api";
+                var firstScriptTag = document.getElementsByTagName('script')[0];
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+                var player;
+                function onYouTubeIframeAPIReady() {
+                    loadVideo();
+                }
+
+                function getNext(immediate){
+                    var nextid = getRandomVideo();
+                    $.get("dur.php?id="+nextid, function(d){
+                        next = {id: nextid, dur: d};
+                        if(immediate) loadVideo();
+                    });
+                }
+
+                $("body").click(function(){
+                    $("#player").remove();
+                    $("body").append("<div id=\"player\"></div>");
+                    $("#noise").show();
+                    loop.volume(1);
+                    loadVideo();
+                });
+
+                function loadVideo(){
+                    if(next == null){
+                        getNext(true);
+                        return;
+                    }
+                    player = new YT.Player('player', {
+                        height: '390',
+                        width: '640',
+                        videoId: next.id,
+                        playerVars: {
+                            autoplay: true,
+                            start: parseInt(Math.random()*0.6*next.dur+0.2*next.dur),
+                            controls: 0,
+                            modestbranding: 1,
+                            showinfo: 0
+                        },
+                        events: {
+                            'onReady': onPlayerReady,
+                            'onStateChange': onPlayerStateChange
+                        }
+                    });
+                    player.setPlaybackQuality("default");
+                }
+
+                function getRandomVideo(){
+                    var id = currentId;
+                    while(id == currentId){
+                        id = videos[parseInt(Math.random()*videos.length)];
+                    }
+                    currentId = id;
+                    return id;
+                }
+
+                // 4. The API will call this function when the video player is ready.
+                function onPlayerReady(event) {
+                    console.log(currentId);
+                    event.target.playVideo();
+                    getNext();
+                }
+
+                function onPlayerStateChange(event) {
+                    if (event.data == YT.PlayerState.PLAYING) {
+                        $("#noise").hide();
+                        loop.volume(0);
+                    }
+                }
+
+                function stopVideo() {
+                    player.stopVideo();
+                }
+
+                var loop = new SeamlessLoop();
+                loop.addUri("static.wav", 3400, "sound1");
+                loop.callback(soundsLoaded);
+                function soundsLoaded() {
+                    loop.start("sound1");
+                };
+
+            </script>
+      </body>
+</html>
