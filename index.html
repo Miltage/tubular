@@ -69,7 +69,7 @@
 
                 function getNext(immediate){
                     var nextid = getRandomVideo();
-                    $.get("dur.php?id="+nextid, function(d){
+                    $.get("http://robertshenton.co.za/tubular/dur.php?id="+nextid, function(d){
                         next = {id: nextid, dur: d};
                         if(immediate) loadVideo();
                     });
