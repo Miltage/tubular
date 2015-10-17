@@ -4,6 +4,6 @@ A Channel hopping simulator
 
 Inspired by http://neave.tv/
 
-Uses the YouTube API to load random videos,
+Uses the YouTube API to load random videos.
 
 Click to switch channels.
